@@ -8,6 +8,10 @@ const app = express();
 
 app.set("view engine", "ejs");
 
+//enable feature to allows us access the values user type into the form
+
+app.use(express.urlencoded({ extended: false }));
+
 // make the public folder available for our application
 app.use(express.static("public"));
 
@@ -18,4 +22,14 @@ app.get("/", (req, res) => {
   res.render("homepage");
 });
 
+//setup a route for login page
+
+app.get("/login", (req, res) => {
+  res.render("login");
+});
+
+app.post("/register", (req, res) => {
+  console.log(req.body);
+  res.send("Thanks for registering");
+});
 app.listen(3001);

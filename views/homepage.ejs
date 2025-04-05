@@ -11,17 +11,29 @@
     <header>
       <h2><a href="/">Our Wonderful App</a></h2>
       <nav>
-        <a href="#">Log In</a>
+        <a href="/login">Log In</a>
       </nav>
     </header>
 
     <main>
-      <h3>Hello this is the homepage</h3>
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Provident esse
-        quaerat repellat itaque! Eaque nostrum beatae nemo placeat provident
-        ratione.
-      </p>
+      <form action="/register" method="POST">
+        <fieldset>
+          <legend>Create an Account</legend>
+          <label for="username"><small>Username</small></label>
+          <input type="text" id="username" name="username" autocomplete="off" />
+
+          <label for="password"><small>Password</small></label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            autocomplete="off"
+          />
+
+          <br />
+          <button>Sign Up</button>
+        </fieldset>
+      </form>
     </main>
 
     <footer>
