@@ -15,6 +15,12 @@ app.use(express.urlencoded({ extended: false }));
 // make the public folder available for our application
 app.use(express.static("public"));
 
+//Adding a middleware this comes after trying to display error in ejshomepage
+app.use(function (req, res, next) {
+  res.locals.error = [];
+  next();
+});
+
 //visit  a url
 
 app.get("/", (req, res) => {
@@ -37,13 +43,18 @@ app.post("/register", (req, res) => {
   req.body.username = req.body.username.trim();
 
   if (!req.body.username) error.push("You must provide a username");
-  if (req.body.password && req.body.username.length < 4)
+  if (req.body.password && req.body.username.length < 3)
     error.push("Username should not be less than 6 characters");
   if (req.body.password && req.body.username.length > 10)
     error.push("Username should not exceed 10 characters");
 
-  if (req.body.username && !req.body.username.match(`^[a-zA-Z0-9{3,}]$`))
+  if (req.body.username && !req.body.username.match(/^[a-zA-Z0-9]+$/))
     error.push("Username can only contain letters and numbers ");
-  res.send("Thanks for registering");
+
+  if (error.length) {
+    return res.render("homepage", { error });
+  } else {
+    res.send("Thanks for registering");
+  }
 });
 app.listen(3001);

@@ -17,6 +17,13 @@
 
     <main>
       <form action="/register" method="POST">
+        <!-- This is where we display the error that will display if the form validation is not adhered to. We Display errors using JavaScript in ejs  -->
+
+        <% error.forEach(e =>{ %>
+        <p class="notice"><%= e %></p>
+
+        <% })%>
+
         <fieldset>
           <legend>Create an Account</legend>
           <label for="username"><small>Username</small></label>
