@@ -29,7 +29,17 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  console.log(req.body);
+  const error = [];
+
+  if (typeof req.body.username !== "string") req.body.username = "";
+  if (typeof req.body.password !== "string") req.body.password = "";
+
+  req.body.username = req.body.username.trim();
+
+  if (!req.body.username) error.push("You must provide a username");
+  if (!req.body.password && req.body.username.length < 4)
+    error.push("Username should not be less than 6 characters");
+
   res.send("Thanks for registering");
 });
 app.listen(3001);
