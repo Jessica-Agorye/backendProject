@@ -1,6 +1,31 @@
-//pulle xpress package
+//pull express package
 
 const express = require("express");
+const db = require("better-sqlite3")("ourApp.db");
+
+//improve speed of database
+
+db.pragma("journal_mode = WAL");
+
+//database setup here - we create the table structure for user name and password
+
+const createTables = db.transaction(() => {
+  db.prepare(
+    `
+    CREATE TABLE IF NOT EXISTS users(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username STRING NOT NULL UNIQUE,
+    password STRING NOT NULL
+    
+    )
+    `
+  ).run();
+});
+createTables();
+
+//database table ends before this line
+
+// This calls express and tells it to give us an empty server setup we can now configure
 
 const app = express();
 
@@ -43,18 +68,31 @@ app.post("/register", (req, res) => {
   req.body.username = req.body.username.trim();
 
   if (!req.body.username) error.push("You must provide a username");
-  if (req.body.password && req.body.username.length < 3)
+  if (req.body.username && req.body.username.length < 3)
     error.push("Username should not be less than 6 characters");
-  if (req.body.password && req.body.username.length > 10)
+  if (req.body.username && req.body.username.length > 10)
     error.push("Username should not exceed 10 characters");
 
   if (req.body.username && !req.body.username.match(/^[a-zA-Z0-9]+$/))
     error.push("Username can only contain letters and numbers ");
 
+  if (!req.body.password) error.push("You must provide a password");
+  if (req.body.password && req.body.password.length < 12)
+    error.push("Password should be atleast 12 characters");
+  if (req.body.password && req.body.password.length > 70)
+    error.push("Username should not exceed 70 characters");
+
   if (error.length) {
     return res.render("homepage", { error });
-  } else {
-    res.send("Thanks for registering");
   }
+  // save the new user into a database
+
+  const ourStatement = db.prepare(
+    "INSERT INTO users (username,password) VALUES (?,?)  "
+  );
+  ourStatement.run(request.body.username, req.body.password);
+  // Log user in by giving them a cookie
+
+  res.send("Thank you");
 });
 app.listen(3001);
