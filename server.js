@@ -96,8 +96,14 @@ app.post("/register", (req, res) => {
   const ourStatement = db.prepare(
     "INSERT INTO users (username,password) VALUES (?,?)"
   );
+
   ourStatement.run(req.body.username, req.body.password);
   // Log user in by giving them a cookie
+  res.cookie("ourSimpleApp", "superTopSecretValue", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "strict",
+  });
 
   res.send("Thank you");
 });
