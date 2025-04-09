@@ -1,3 +1,6 @@
+//pull bcrypt package for hashing password
+const bcrypt = require("bcrypt");
+
 //pull express package
 
 const express = require("express");
@@ -86,11 +89,14 @@ app.post("/register", (req, res) => {
     return res.render("homepage", { error });
   }
   // save the new user into a database
+  //Hash password before saving into a database
+  const salt = bcrypt.genSaltSync(10);
+  req.body.password = bcrypt.hashSync(req.body.password, salt);
 
   const ourStatement = db.prepare(
-    "INSERT INTO users (username,password) VALUES (?,?)  "
+    "INSERT INTO users (username,password) VALUES (?,?)"
   );
-  ourStatement.run(request.body.username, req.body.password);
+  ourStatement.run(req.body.username, req.body.password);
   // Log user in by giving them a cookie
 
   res.send("Thank you");
