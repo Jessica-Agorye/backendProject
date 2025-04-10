@@ -1,3 +1,7 @@
+require("dotenv").config();
+
+const jwt = require("jsonwebtoken");
+
 //pull bcrypt package for hashing password
 const bcrypt = require("bcrypt");
 
@@ -99,10 +103,16 @@ app.post("/register", (req, res) => {
 
   ourStatement.run(req.body.username, req.body.password);
   // Log user in by giving them a cookie
+
+  const ourTokenValue = jwt.sign(
+    { skyColor: "blue", userId: 4 },
+    process.env.JWTSECRET
+  );
   res.cookie("ourSimpleApp", "superTopSecretValue", {
     httpOnly: true,
     secure: true,
     sameSite: "strict",
+    maxAge: 1000 * 60 * 60 * 20, //cookie is good for one day
   });
 
   res.send("Thank you");
