@@ -75,7 +75,7 @@ app.post("/register", (req, res) => {
   req.body.username = req.body.username.trim();
 
   if (!req.body.username) error.push("You must provide a username");
-  if (req.body.username && req.body.username.length < 3)
+  if (req.body.username && req.body.username.length < 4)
     error.push("Username should not be less than 6 characters");
   if (req.body.username && req.body.username.length > 10)
     error.push("Username should not exceed 10 characters");
