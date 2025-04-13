@@ -5,6 +5,10 @@ const jwt = require("jsonwebtoken");
 //pull bcrypt package for hashing password
 const bcrypt = require("bcrypt");
 
+//cookie parser
+
+const cookierParser = require("cookie-parser");
+
 //pull express package
 
 const express = require("express");
@@ -47,9 +51,23 @@ app.use(express.urlencoded({ extended: false }));
 // make the public folder available for our application
 app.use(express.static("public"));
 
+app.use(cookierParser());
+
 //Adding a middleware this comes after trying to display error in ejshomepage
 app.use(function (req, res, next) {
   res.locals.error = [];
+  // try to decode incoming cookie
+
+  try {
+    const decoded = jwt.verify(req.cookies.ourSimpleApp, process.env.JWTSECRET);
+    req.user = decoded;
+  } catch (err) {
+    req.user = false;
+  }
+
+  res.locals.user = req.user;
+  console.log(req.user);
+
   next();
 });
 
@@ -101,18 +119,26 @@ app.post("/register", (req, res) => {
     "INSERT INTO users (username,password) VALUES (?,?)"
   );
 
-  ourStatement.run(req.body.username, req.body.password);
+  const result = ourStatement.run(req.body.username, req.body.password);
   // Log user in by giving them a cookie
 
+  const lookupStatement = db.prepare("SELECT * FROM users WHERE ROWID = ?");
+  const ourUser = lookupStatement.get(result.lastInsertRowid);
+
   const ourTokenValue = jwt.sign(
-    { skyColor: "blue", userId: 4 },
+    {
+      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24,
+      skyColor: "blue",
+      userId: ourUser.id,
+      username: ourUser.username,
+    },
     process.env.JWTSECRET
   );
-  res.cookie("ourSimpleApp", "superTopSecretValue", {
+  res.cookie("ourSimpleApp", ourTokenValue, {
     httpOnly: true,
     secure: true,
     sameSite: "strict",
-    maxAge: 1000 * 60 * 60 * 20, //cookie is good for one day
+    maxAge: 1000 * 60 * 60 * 24, //cookie is good for one day
   });
 
   res.send("Thank you");
