@@ -75,6 +75,9 @@ app.use(function (req, res, next) {
 
 app.get("/", (req, res) => {
   //express gives us access to request and response
+  if (req.user) {
+    return res.render("dashboard");
+  }
   res.render("homepage");
 });
 
