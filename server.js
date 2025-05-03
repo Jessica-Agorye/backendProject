@@ -91,6 +91,8 @@ app.get("/logout", (req, res) => {
   res.clearCookie("ourSimpleApp");
   res.redirect("/");
 });
+
+
 app.post("/register", (req, res) => {
   const error = [];
 
@@ -119,6 +121,7 @@ app.post("/register", (req, res) => {
   }
   // save the new user into a database
   //Hash password before saving into a database
+
   const salt = bcrypt.genSaltSync(10);
   req.body.password = bcrypt.hashSync(req.body.password, salt);
 
