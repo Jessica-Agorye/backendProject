@@ -92,6 +92,59 @@ app.get("/logout", (req, res) => {
   res.redirect("/");
 });
 
+app.post("/login", (req, res) => {
+  let error = [];
+
+  if (typeof req.body.username !== "string") req.body.username = "";
+  if (typeof req.body.password !== "string") req.body.password = "";
+
+  if (req.body.username.trim() == "") error = ["Invalid username/password."];
+  if (req.body.password == "") error = ["Invalid username /password"];
+
+  if (error.length) {
+    return res.render("login", { error });
+  }
+
+  const userInQuestionStatement = db.prepare(
+    "SELECT * FROM users WHERE USERNAME = ?"
+  );
+  const userInQuestion = userInQuestionStatement.get(req.body.username);
+
+  if (!userInQuestion) {
+    error = ["Invalid username /password."];
+    return res.render("login", { error });
+  }
+
+  const matchOrNot = bcrypt.compareSync(
+    req.body.password,
+    userInQuestion.password
+  );
+
+  if (!matchOrNot) {
+    error = ["Invalid username /password."];
+    return res.render("login", { error });
+  }
+
+  // give users cookie and redirect
+
+  const ourTokenValue = jwt.sign(
+    {
+      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24,
+      skyColor: "blue",
+      userId: userInQuestion.id,
+      username: userInQuestion.username,
+    },
+    process.env.JWTSECRET
+  );
+  res.cookie("ourSimpleApp", ourTokenValue, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "strict",
+    maxAge: 1000 * 60 * 60 * 24, //cookie is good for one day
+  });
+
+  res.redirect("/");
+});
 
 app.post("/register", (req, res) => {
   const error = [];
@@ -151,6 +204,6 @@ app.post("/register", (req, res) => {
     maxAge: 1000 * 60 * 60 * 24, //cookie is good for one day
   });
 
-  res.send("Thank you");
+  res.redirect("/");
 });
 app.listen(3001);

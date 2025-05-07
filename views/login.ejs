@@ -6,7 +6,31 @@
     <%- include('includes/header') %>
 
     <main>
-      <h3>Log in Page</h3>
+      <form action="/login" method="POST">
+        <!-- This is where we display the error that will display if the form validation is not adhered to. We Display errors using JavaScript in ejs  -->
+
+        <% error.forEach(e =>{ %>
+        <p class="notice"><%= e %></p>
+
+        <% })%>
+
+        <fieldset>
+          <legend>Log In</legend>
+          <label for="username"><small>Username</small></label>
+          <input type="text" id="username" name="username" autocomplete="off" />
+
+          <label for="password"><small>Password</small></label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            autocomplete="off"
+          />
+
+          <br />
+          <button>Log In</button>
+        </fieldset>
+      </form>
     </main>
 
     <%- include('includes/footer') %>
