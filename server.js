@@ -163,6 +163,15 @@ app.post("/register", (req, res) => {
   if (req.body.username && !req.body.username.match(/^[a-zA-Z0-9]+$/))
     error.push("Username can only contain letters and numbers ");
 
+  //chech if username exist already
+  const usernameStatement = db.prepare(
+    "SELECT * FROM users WHERE username = ?"
+  );
+
+  const usernameCheck = usernameStatement.get(req.body.username);
+
+  if (usernameCheck) error.push("The username is already taken");
+
   if (!req.body.password) error.push("You must provide a password");
   if (req.body.password && req.body.password.length < 12)
     error.push("Password should be atleast 12 characters");
