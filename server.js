@@ -146,6 +146,15 @@ app.post("/login", (req, res) => {
   res.redirect("/");
 });
 
+app.get("/create-post", (req, res) => {
+  res.render("create-post");
+});
+
+app.post("/create-post", (req, res) => {
+  console.log(req.body);
+  res.send("Thank you");
+});
+
 app.post("/register", (req, res) => {
   const error = [];
 
