@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const jwt = require("jsonwebtoken");
+const sanitizeHTML = require("sanitize-html");
 
 //pull bcrypt package for hashing password
 const bcrypt = require("bcrypt");
@@ -28,6 +29,21 @@ const createTables = db.transaction(() => {
     username STRING NOT NULL UNIQUE,
     password STRING NOT NULL
     
+    )
+    `
+  ).run();
+
+  //post table
+
+  db.prepare(
+    `
+    CREATE TABLE IF NOT EXISTS posts(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    createDate TEXT,
+    title STRING NOT NULL,
+    body TEXT NOT NULL,
+    authorid INTEGER,
+    FOREIGN KEY (authorid) REFERENCES users (id)
     )
     `
   ).run();
@@ -146,13 +162,72 @@ app.post("/login", (req, res) => {
   res.redirect("/");
 });
 
-app.get("/create-post", (req, res) => {
+function mustBeLoggedIn(req, res, next) {
+  if (req.user) {
+    return next();
+  }
+  return res.redirect("/");
+}
+
+app.get("/create-post", mustBeLoggedIn, (req, res) => {
   res.render("create-post");
 });
 
-app.post("/create-post", (req, res) => {
-  console.log(req.body);
-  res.send("Thank you");
+function sharedPostValidation(req) {
+  const error = [];
+
+  if (typeof req.body.title !== "string") req.body.title = "";
+  if (typeof req.body.body !== "string") req.body.body = "";
+
+  req.body.title = sanitizeHTML(req.body.title.trim(), {
+    allowedTags: [],
+    allowedAttributes: {},
+  });
+
+  req.body.body = sanitizeHTML(req.body.body.trim(), {
+    allowedTags: [],
+    allowedAttributes: {},
+  });
+
+  if (!req.body.title) error.push("You must provide a title");
+  if (!req.body.body) error.push("You must provide content");
+
+  return error;
+}
+
+app.get("/post/:id", (req, res) => {
+  const statement = db.prepare("SELECT * FROM posts WHERE id =?");
+  const post = statement.get(req.params.id);
+
+  if (!post) {
+    return res.redirect("/");
+  }
+
+  res.render("single-post", { post: post });
+});
+
+app.post("/create-post", mustBeLoggedIn, (req, res) => {
+  const error = sharedPostValidation(req);
+  if (error.length) {
+    return res.render("create-post", { error });
+  }
+
+  //save to database
+
+  const ourStatement = db.prepare(
+    "INSERT INTO posts (title,body,authorid,createDate ) VALUES (?,?,?,?)"
+  );
+  const result = ourStatement.run(
+    req.body.title,
+    req.body.body,
+    req.user.userId,
+    new Date().toISOString()
+  );
+
+  const getPostStatement = db.prepare("SELECT *FROM posts WHERE ROWID = ? ");
+  const realPost = getPostStatement.get(result.lastInsertRowid);
+
+  res.redirect(`/post/${realPost.id}`);
 });
 
 app.post("/register", (req, res) => {
