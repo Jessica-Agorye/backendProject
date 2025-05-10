@@ -196,7 +196,9 @@ function sharedPostValidation(req) {
 }
 
 app.get("/post/:id", (req, res) => {
-  const statement = db.prepare("SELECT * FROM posts WHERE id =?");
+  const statement = db.prepare(
+    "SELECT posts.*, users.username FROM posts INNER JOIN users ON posts.authorid = users.id WHERE posts.id =?"
+  );
   const post = statement.get(req.params.id);
 
   if (!post) {

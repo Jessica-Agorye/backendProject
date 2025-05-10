@@ -7,7 +7,19 @@
 
     <main>
       <h1><%= post.title%></h1>
-      <p><%= post.body %></p>
+
+      <article>
+        <small
+          >Posted by <%= post.username %> on <%= new
+          Date(post.createDate).getMonth() + 1 %>/<%=new
+          Date(post.createDate).getDate() %>/ <%= new
+          Date(post.createDate).getFullYear()%>
+        </small>
+
+        <div>
+          <p><%= post.body %></p>
+        </div>
+      </article>
     </main>
     <%- include('includes/footer') %>
   </body>
