@@ -35,3 +35,9 @@
     <%- include('includes/footer') %>
   </body>
 </html>
+<script>
+  fetch("http://localhost:3001/api/cors-test")
+    .then((res) => res.json())
+    .then((data) => console.log("Shouldn't work:", data))
+    .catch((err) => console.error("CORS Error:", err));
+</script>

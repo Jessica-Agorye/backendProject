@@ -97,6 +97,10 @@ app.get("/", (req, res) => {
   res.render("homepage");
 });
 
+app.get("/api/cors-test", (req, res) => {
+  res.json({ message: "Hello from the backend!" });
+});
+
 //setup a route for login page
 
 app.get("/login", (req, res) => {
@@ -301,4 +305,4 @@ app.post("/register", (req, res) => {
 
   res.redirect("/");
 });
-app.listen(3001);
+app.listen(3000);
