@@ -199,6 +199,20 @@ function sharedPostValidation(req) {
   return error;
 }
 
+app.get("/edit-post/:id", (req, res) => {
+  // try to look up post in question
+
+  const statement = db.prepare("SELECT * FROM posts WHERE id = ?");
+  const post = statement.get(req.params.id);
+
+  //if not author redirect to homepage
+  if (post.authorid !== req.user.userId) {
+    return redirect("/");
+  }
+  // otherwise, render edit post template
+
+  res.render("edit-post", { post });
+});
 app.get("/post/:id", (req, res) => {
   const statement = db.prepare(
     "SELECT posts.*, users.username FROM posts INNER JOIN users ON posts.authorid = users.id WHERE posts.id =?"
