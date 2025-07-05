@@ -205,13 +205,41 @@ app.get("/edit-post/:id", (req, res) => {
   const statement = db.prepare("SELECT * FROM posts WHERE id = ?");
   const post = statement.get(req.params.id);
 
+  if (!post) {
+    return res.redirect("/");
+  }
   //if not author redirect to homepage
   if (post.authorid !== req.user.userId) {
-    return redirect("/");
+    return res.redirect("/");
   }
   // otherwise, render edit post template
 
   res.render("edit-post", { post });
+});
+
+app.post("/edit-post/:id", (req, res) => {
+  const statement = db.prepare("SELECT * FROM posts WHERE id = ?");
+  const post = statement.get(req.params.id);
+
+  if (!post) {
+    return res.redirect("/");
+  }
+  //if not author redirect to homepage
+  if (post.authorid !== req.user.userId) {
+    return res.redirect("/");
+  }
+
+  const error = sharedPostValidation(req);
+
+  if (error.length) {
+    return res.render("edit-post", { error });
+  }
+
+  const updateStatement = db.prepare(
+    "UPDATE posts SET title =? ,  body= ? WHERE id=? "
+  );
+  updateStatement.run(req.body.title, req.body.body, req.params.id);
+  res.redirect(`/post/${req.params.id}`);
 });
 app.get("/post/:id", (req, res) => {
   const statement = db.prepare(
