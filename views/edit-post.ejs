@@ -6,7 +6,7 @@
     <%- include('includes/header') %>
 
     <main>
-      <form action="/create-post" method="POST">
+      <form action="/edit-post/<%=post.id %>" method="POST">
         <!-- This is where we display the error that will display if the form validation is not adhered to. We Display errors using JavaScript in ejs  -->
 
         <% error.forEach(e =>{ %>

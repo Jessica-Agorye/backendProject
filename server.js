@@ -199,7 +199,7 @@ function sharedPostValidation(req) {
   return error;
 }
 
-app.get("/edit-post/:id", (req, res) => {
+app.get("/edit-post/:id", mustBeLoggedIn, (req, res) => {
   // try to look up post in question
 
   const statement = db.prepare("SELECT * FROM posts WHERE id = ?");
@@ -217,7 +217,7 @@ app.get("/edit-post/:id", (req, res) => {
   res.render("edit-post", { post });
 });
 
-app.post("/edit-post/:id", (req, res) => {
+app.post("/edit-post/:id", mustBeLoggedIn, (req, res) => {
   const statement = db.prepare("SELECT * FROM posts WHERE id = ?");
   const post = statement.get(req.params.id);
 
@@ -241,6 +241,24 @@ app.post("/edit-post/:id", (req, res) => {
   updateStatement.run(req.body.title, req.body.body, req.params.id);
   res.redirect(`/post/${req.params.id}`);
 });
+
+app.post("/delete-post/:id", mustBeLoggedIn, (req, res) => {
+  const statement = db.prepare("SELECT * FROM posts WHERE id = ?");
+  const post = statement.get(req.params.id);
+
+  if (!post) {
+    return res.redirect("/");
+  }
+  //if not author redirect to homepage
+  if (post.authorid !== req.user.userId) {
+    return res.redirect("/");
+  }
+
+  const deleteStatemen = db.prepare("DELETE FROM posts WHERE id=?");
+  deleteStatemen.run(req.params.id);
+  res.redirect("/");
+});
+
 app.get("/post/:id", (req, res) => {
   const statement = db.prepare(
     "SELECT posts.*, users.username FROM posts INNER JOIN users ON posts.authorid = users.id WHERE posts.id =?"
